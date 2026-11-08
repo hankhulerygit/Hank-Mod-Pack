@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Hank Mod Pack : Improved Spawn + Improved Replay Editor + Overlay (+ Fun) + HUD dans une seule DLL.
+    Compiler :   dotnet build -c Release
+    Le DLL est copié dans <jeu>\JibbersMods\cs\ si le jeu est trouvé (sinon copie-le à la main, puis relance le jeu).
+  -->
+
+  <PropertyGroup>
+    <AssemblyName>Hank Mod Pack</AssemblyName>
+    <Version>1.52.8</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <!-- Dossier du jeu (où est Jibbers.exe). Change-le si besoin :  dotnet build -c Release -p:JibbersGame="D:\Jeux\Jibbers Playtest" -->
+    <JibbersGame Condition="'$(JibbersGame)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Jibbers Playtest</JibbersGame>
+    <!-- Le SDK installé dans le jeu. -->
+    <JibbersSdk Condition="'$(JibbersSdk)' == ''">$(JibbersGame)\JibbersMods\dotnet\Jibbers.Sdk.dll</JibbersSdk>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false : le jeu a déjà le SDK, ne pas en livrer une deuxième copie. -->
+    <Reference Include="Jibbers.Sdk">
+      <HintPath>$(JibbersSdk)</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Fichiers livrés par défaut dans « Fun Overlay\1 » (GIF + son de l'évènement 1). -->
+    <EmbeddedResource Include="Overlay\Default\rick.gif" LogicalName="Default.rick.gif" />
+    <EmbeddedResource Include="Overlay\Default\rick.mp3" LogicalName="Default.rick.mp3" />
+    <EmbeddedResource Include="Overlay\Default\heli.gif" LogicalName="Default.heli.gif" />
+    <EmbeddedResource Include="Overlay\Default\heli.mp3" LogicalName="Default.heli.mp3" />
+    <EmbeddedResource Include="Overlay\Default\triple.gif" LogicalName="Default.triple.gif" />
+    <EmbeddedResource Include="Overlay\Default\triple.mp3" LogicalName="Default.triple.mp3" />
+    <EmbeddedResource Include="Hud\Tex\steel.bin" LogicalName="Tex.steel.bin" />
+    <EmbeddedResource Include="Hud\Tex\wood.bin" LogicalName="Tex.wood.bin" />
+    <EmbeddedResource Include="Hud\Tex\wool.bin" LogicalName="Tex.wool.bin" />
+    <EmbeddedResource Include="Hud\Tex\winter.bin" LogicalName="Tex.winter.bin" />
+    <EmbeddedResource Include="Hud\Tex\summer.bin" LogicalName="Tex.summer.bin" />
+  </ItemGroup>
+
+  <Target Name="InstallToGame" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' And Exists('$(JibbersGame)\Jibbers.exe') And '$(JibbersNoInstall)' != 'true'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(JibbersGame)\JibbersMods\cs" />
+    <Message Importance="high" Text="Installé : $(TargetFileName) dans $(JibbersGame)\JibbersMods\cs (relance le jeu)" />
+  </Target>
+
+</Project>
