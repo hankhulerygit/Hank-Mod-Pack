@@ -41,3 +41,15 @@ public abstract class PackPart : JibbersMod
         catch (Exception e) { Log("could not import the settings of the pack: " + e.Message); }
     }
 }
+
+/// <summary>
+/// Entry of the pack itself: the one mod that derives directly from JibbersMod (the others go through PackPart).
+/// It has no setting; it only shows that the pack is loaded and which version.
+/// </summary>
+public sealed class HankModPackInfoMod : JibbersMod
+{
+    public override string Id => "hank_mod_pack_info";
+    public override string Name => "Hank Mod Pack";
+    public override string Author => "Hank";
+    public override string Description => "Nine mods in one DLL: Quick Menu, Free Look, Play Cameras, HUD, Improved Spawn, Improved Replay Editor, Replay Camera, Overlay and Fun. Each one has its own entry named Hank Mod Pack: ... in Options > Mods.";
+}
