@@ -1,6 +1,6 @@
 # Hank Mod Pack
 
-![Hank Mod Pack overview](../../../docs/assets/hank-mod-pack-overview.png)
+![Hank Mod Pack overview](overview.png)
 
 Hank's controller quick menu, free look and improved on-foot camera, play cameras, HUD themes, an
 Input Visualizer (drawn PS4 / Xbox One controller), replay editor effects, replay cameras, Improved
