@@ -1,6 +1,0 @@
-Quick Actions: one list with every pad button, starting pattern
-Updates from GitHub, install from Quick menu > Settings
-Input Visualizer no longer turns itself back on
-On-foot camera: no drift after respawn, R3 looks behind
-HUD and visualizer wait for the end of loading screens
-All pack files now in JibbersMods/Hank Mod Pack
