@@ -1,0 +1,2 @@
+Test of the in-game update
+The pack version is shown after "up to date"
