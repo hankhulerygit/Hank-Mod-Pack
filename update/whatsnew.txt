@@ -1,6 +1,0 @@
-Works again with the new game update (Steam build 26688799)
-Updates from GitHub: Triangle / Y or Alt Gr on the game menu
-Quick Actions: one list with every pad button, D-pad pictures
-Input Visualizer no longer turns itself back on
-On-foot camera: no drift after respawn, R3 looks behind
-All pack files now in JibbersMods/Hank Mod Pack
