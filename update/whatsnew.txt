@@ -1,1 +1,3 @@
 The F3 options (fog, clouds, snow, lamps...) are now keyframes: they blend over the replay.
+
+The Cam Lamp switch works again in the replay editor (uses the F3 Cam Lamp colour, intensity and range).
