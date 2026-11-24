@@ -1,0 +1,1 @@
+The F3 options (fog, clouds, snow, lamps...) are now keyframes: they blend over the replay.
