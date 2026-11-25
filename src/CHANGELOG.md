@@ -1,5 +1,10 @@
 # Hank Mod Pack changelog
 
+## 1.9.7
+
+### Fixed
+- Keyframe presets: when the game gives no readable map name, the map is recognised by the size and position of its terrains and named "Map-xxxxxx" (rename presets as you like). Each map now keeps its own presets. The log line "TLFX: map name" shows every source that was tried.
+
 ## 1.9.6
 
 ### Fixed

@@ -310,12 +310,12 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
     {
         var now = Environment.TickCount64;
         if (mapName.Length > 0 && now < mapNameUntil) return mapName;
-        string name = "";
+        string name = ""; mapFileSeen = "";
         try
         {
             foreach (var imp in Jibbers.Interop.Jibbers.MapTools.MapImporter.Live())
             {
-                var file = imp.mapFileName;
+                var file = imp.mapFileName; mapFileSeen = file ?? "";
                 if (!string.IsNullOrWhiteSpace(file)) { name = Path.GetFileNameWithoutExtension(file.Trim()); break; }
             }
         }
@@ -329,14 +329,39 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
             }
             catch (Exception e) { LogOnce("mapname", e); }
         }
-        if (string.IsNullOrWhiteSpace(name)) { try { name = Recorder.Instance.Clip.Raw.ydw ?? ""; } catch { } }
+        string clipA = "", clipB = "", fingerprint = "";
+        try { clipA = Recorder.Instance.Clip.Raw.ydw ?? ""; clipB = Recorder.Instance.Clip.Raw.ydt ?? ""; } catch { }
+        if (string.IsNullOrWhiteSpace(name)) name = clipA;
+        if (string.IsNullOrWhiteSpace(name)) name = clipB;
+        // The game gives no readable map name here: the map is recognised by the shape of its terrain (size and position of every Terrain), so each map keeps its own presets.
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            try
+            {
+                var sb = new System.Text.StringBuilder();
+                var terrains = Unity.FindObjects(Unity.Class("UnityEngine.Terrain"));
+                foreach (var tr in terrains.Take(24))
+                {
+                    var size = Unity.Call<Vector3>(Unity.Call(tr, "get_terrainData"), "get_size");
+                    var pos = Unity.Call<Vector3>(Unity.Transform(tr), "get_position");
+                    sb.Append($"{size.X:0.#},{size.Y:0.#},{size.Z:0.#}@{pos.X:0.#},{pos.Y:0.#},{pos.Z:0.#};");
+                }
+                if (sb.Length > 0)
+                {
+                    uint h = 2166136261; foreach (var c in sb.ToString()) { h ^= c; h *= 16777619; }
+                    fingerprint = h.ToString("x8")[..6];
+                    name = "Map-" + fingerprint;
+                }
+            }
+            catch (Exception e) { LogOnce("mapfinger", e); }
+        }
         if (string.IsNullOrWhiteSpace(name)) name = "Unknown map";
-        if (name != mapName) Log($"TLFX: map name: {name}");
+        if (name != mapName) Log($"TLFX: map name: {name} (map file '{(mapFileSeen)}', clip '{clipA}' / '{clipB}', terrain fingerprint '{fingerprint}')");
         mapName = name;
         mapNameUntil = now + (name == "Unknown map" ? 1000 : 3000);
         return name;
     }
-    string mapName = ""; long mapNameUntil;
+    string mapName = "", mapFileSeen = ""; long mapNameUntil;
 
     static string MapFolder(string map) => Path.Combine(PresetsRoot, Sanitize(map));
 

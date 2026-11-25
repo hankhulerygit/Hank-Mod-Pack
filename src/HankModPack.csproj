@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>HankModPack</AssemblyName>
-    <Version>1.9.6</Version>
+    <Version>1.9.7</Version>
   </PropertyGroup>
   <ItemGroup><InternalsVisibleTo Include="HankModPack.Tests" /></ItemGroup>
   <ItemGroup><EmbeddedResource Include="Fonts\*.ttf" LogicalName="HankModPack.Fonts.%(Filename)%(Extension)" /></ItemGroup>

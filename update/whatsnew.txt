@@ -1,4 +1,5 @@
-Hank Mod Pack 1.9.6 - what's new:
+Hank Mod Pack 1.9.7 - what's new:
+- Fixed: keyframe presets are now kept per map even when the game gives no map name (the map is recognised by its terrain and named Map-xxxxxx).
 - Fixed: saved keyframes no longer load on other maps; each map has its own presets, and their default name starts with the map name.
 - New: Rename keyframes in the keyframe panel.
 - Fixed: loading saved keyframes now brings back all the replay's camera keyframes, not only the first one (the game adds the missing ones itself).
