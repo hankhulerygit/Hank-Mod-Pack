@@ -1,10 +1,1 @@
-Hank Mod Pack 1.8.6 - what's new:
-- Replay editor, effects window (R2): new "Keyframes" section with Save / Load / Delete of keyframe presets. Save / Load / Delete are also the last rows of the keyframe panel.
-- Replay editor: Cam Lamp switch works again (own light on the replay camera, with the F3 colour, intensity and range), and Map Lights colour keeps working.
-- Fixed a game crash when loading saved keyframes.
-- Loading a preset applies its game keyframes to the keyframes the replay already has (add them first, then load).
-- Fixed Follow cam and POV locking the game speed in the replay: Faster / Slower work again.
-- Effects window legend: "hold: more" now shows L2.
-- Follow cam and POV: every setting now blends between keyframes; the effects window edits the keyframe value.
-- Effects window: the keyframe presets tab is now "Keyframes settings" and is the last tab.
-- Fixed the replay editor / Follow cam / POV disappearing after opening another replay.
+Fixed Improved Replay Editor disapearing after opening replay editor multiple times
