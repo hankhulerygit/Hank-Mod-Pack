@@ -1,4 +1,8 @@
-Hank Mod Pack 1.9.4 - what's new:
+Hank Mod Pack 1.9.6 - what's new:
+- Fixed: saved keyframes no longer load on other maps; each map has its own presets, and their default name starts with the map name.
+- New: Rename keyframes in the keyframe panel.
+- Fixed: loading saved keyframes now brings back all the replay's camera keyframes, not only the first one (the game adds the missing ones itself).
+- Effects window (R2): Up on the first tab jumps to the last tab (Keyframes settings).
 - The update message on the game menu now resizes to the window font.
 - New: window fonts. Pick the font of the pack's windows (quick menu, effects window, HUD, messages) among 48 fonts: the game's own, the Mod Tool's and Windows'. They come with the mod. Themes window: L2 / R2 change the font (L1 / R1 the theme); also in Options > Mods > HUD > Window font.
 - Fixed: the replay editor, Follow cam and POV disappearing after opening another replay.

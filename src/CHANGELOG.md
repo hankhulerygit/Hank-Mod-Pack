@@ -1,5 +1,20 @@
 # Hank Mod Pack changelog
 
+## 1.9.6
+
+### Fixed
+- Saved keyframes no longer load on other maps: the map is now read from the map file the game loaded (it was always "Unknown map", so every preset went into the same folder). It is looked up again every few seconds. Presets saved before this stay in the Unknown_map folder and show only when the map cannot be read.
+
+### Changed
+- A preset's default name is now "<map name> <date and time>".
+- New "Rename keyframes" drop-down in the keyframe panel: type the new name, then click the preset.
+
+## 1.9.5
+
+### Fixed
+- Loading keyframes: the replay's missing game keyframes are now added through the game's own add-keyframe call (checked after each one, and it stops at the first surprise), so all of them come back, not only the first one. See the log lines starting "TLFX: the replay now has".
+- Effects window (R2): Up on the first tab goes to the last one (Keyframes settings), and Down on the last goes to the first.
+
 ## 1.9.4
 
 ### Changed

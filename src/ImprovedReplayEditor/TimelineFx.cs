@@ -305,24 +305,38 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
     // ---- presets live in Replay Editor Keyframes\Presets\<map>\<name>.json ----
     static string PresetsRoot => Path.Combine(Dir, "Presets");
 
-    /// <summary>The name of the map being replayed (the active scene), or "Unknown map".</summary>
+    /// <summary>The map being replayed: the map file loaded by the game's map importer (for example "Hollow Peak"), else the scene or clip name, else "Unknown map". Looked up again every few seconds, because the map changes between replays.</summary>
     string MapName()
     {
-        if (mapName.Length > 0) return mapName;
+        var now = Environment.TickCount64;
+        if (mapName.Length > 0 && now < mapNameUntil) return mapName;
         string name = "";
         try
         {
-            var scene = Jibbers.Interop.UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-            if (scene != 0) { var p = Unity.Call(scene, "get_name"); if (p != 0) name = Il2Cpp.ReadString(p); }
+            foreach (var imp in Jibbers.Interop.Jibbers.MapTools.MapImporter.Live())
+            {
+                var file = imp.mapFileName;
+                if (!string.IsNullOrWhiteSpace(file)) { name = Path.GetFileNameWithoutExtension(file.Trim()); break; }
+            }
         }
-        catch (Exception e) { LogOnce("mapname", e); }
+        catch (Exception e) { LogOnce("mapimporter", e); }
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            try
+            {
+                var scene = Jibbers.Interop.UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                if (scene != 0) { var p = Unity.Call(scene, "get_name"); if (p != 0) name = Il2Cpp.ReadString(p); }
+            }
+            catch (Exception e) { LogOnce("mapname", e); }
+        }
         if (string.IsNullOrWhiteSpace(name)) { try { name = Recorder.Instance.Clip.Raw.ydw ?? ""; } catch { } }
         if (string.IsNullOrWhiteSpace(name)) name = "Unknown map";
+        if (name != mapName) Log($"TLFX: map name: {name}");
         mapName = name;
-        Log($"TLFX: map name: {name}");
+        mapNameUntil = now + (name == "Unknown map" ? 1000 : 3000);
         return name;
     }
-    string mapName = "";
+    string mapName = ""; long mapNameUntil;
 
     static string MapFolder(string map) => Path.Combine(PresetsRoot, Sanitize(map));
 
@@ -358,7 +372,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
     List<string> kfList = new(); float kfListAt;
     int loadIndex, deleteIndex;
 
-    string DefaultPresetName() => $"Preset {DateTime.Now:yyyy-MM-dd HH-mm}";
+    string DefaultPresetName() => $"{MapName()} {DateTime.Now:yyyy-MM-dd HH-mm}";
 
     /// <summary>Saves the chosen keyframes ("Game", "FX" or "Both") under this map's folder, with the given name.</summary>
     void SavePresetNamed(string what, string name)
@@ -408,6 +422,24 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         ApplyPreset(data, true);
     }
 
+    /// <summary>Renames a preset of this map (the file keeps living in the map's folder).</summary>
+    void RenamePreset(string oldName, string newName)
+    {
+        try
+        {
+            newName = Sanitize(newName.Trim());
+            if (newName.Length == 0 || newName == oldName) return;
+            var dir = MapFolder(MapName());
+            var from = Path.Combine(dir, oldName + ".json"); var to = Path.Combine(dir, newName + ".json");
+            if (!File.Exists(from)) return;
+            if (File.Exists(to)) { Log($"TLFX: could not rename: '{newName}' already exists"); return; }
+            File.Move(from, to);
+            Log($"TLFX: renamed '{oldName}' to '{newName}' ({MapName()})");
+        }
+        catch (Exception e) { Log($"TLFX: could not rename '{oldName}': {e.Message}"); }
+    }
+    string renameTo = "";
+
     void DeletePresetNamed(string map, string name)
     {
         try
@@ -424,6 +456,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
     /// Applies a preset to this replay (stretched to its length): the FX keyframes are replaced, and the game's camera keyframes are applied,
     /// in time order, to the keyframes the replay already has (new ones cannot be created from here).
     /// </summary>
+    bool makeKeyframeFailed;
     bool ApplyPreset(PresetData data, bool log, bool effectsOnly = false)
     {
         try
@@ -442,6 +475,30 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
             {
                 var mine = GameKeyframes();
                 // Game keyframes cannot be created safely from here (it crashed the game): the preset is applied to the keyframes the replay already has.
+                // Missing keyframes are made by the game itself (Recorder.fpz(frame), the same call as its own add-keyframe), never by editing its list.
+                // Each call is checked (the list must grow by one) and the first surprise stops the attempts.
+                if (mine.Count > 0 && mine.Count < data.Game.Count && !makeKeyframeFailed)
+                {
+                    try
+                    {
+                        var rec = Recorder.Instance.Raw;
+                        for (var i = mine.Count; i < data.Game.Count; i++)
+                        {
+                            var frame = (int)Math.Round(data.Game[i].Frame / 10000.0 * total);
+                            var before = mine.Count;
+                            var made = rec.fpz(frame);
+                            mine = GameKeyframes();
+                            if (made.IsNull || mine.Count != before + 1)
+                            {
+                                makeKeyframeFailed = true;
+                                Log($"TLFX: the game did not add a keyframe at frame {frame} (keyframes before {before}, after {mine.Count}); not trying again this session.");
+                                break;
+                            }
+                        }
+                        Log($"TLFX: the replay now has {mine.Count} game keyframes (preset has {data.Game.Count})");
+                    }
+                    catch (Exception e) { makeKeyframeFailed = true; LogOnce("makekf", e); }
+                }
                 var n = Math.Min(mine.Count, data.Game.Count);
                 for (var i = 0; i < n; i++)
                 {
@@ -833,6 +890,17 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
             {
                 var n = name;
                 menu.Button(n, AC(() => LoadPresetNamed(n)));
+            }
+        }), false);
+
+        menu.Accordion("Rename keyframes", AC(() =>
+        {
+            menu.Info(GS(() => $"1. New name, 2. click the preset to rename (map: {MapName()})"), false, null, 0f);
+            menu.TextInput("New name", GS(() => renameTo.Length == 0 ? "(type the new name)" : renameTo), SS(v => renameTo = v), "New name");
+            foreach (var name in mine)
+            {
+                var n = name;
+                menu.Button(n, AC(() => { RenamePreset(n, renameTo); renameTo = ""; }));
             }
         }), false);
 
@@ -3073,7 +3141,8 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         // ---- Gamepad
         if (!fxInTab)
         {
-            fxSel = Math.Clamp(fxSel + inp.Move, 0, tabs - 1);
+            fxSel = fxSel + inp.Move;   // Up on the first tab goes to the last one, Down on the last goes to the first
+            fxSel = fxSel < 0 ? tabs - 1 : fxSel >= tabs ? 0 : fxSel;
             fxTab = fxSel;
             if (inp.A || inp.Dir != 0 && inp.Mult == 1) { if (inp.A) { fxInTab = true; fxSel = 0; fxSub = ""; } }
             if (inp.B) { fxOpen = false; fxView.Hide(); fxWinSig = ""; return; }
