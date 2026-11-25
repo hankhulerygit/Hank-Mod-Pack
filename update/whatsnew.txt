@@ -1,4 +1,5 @@
-Hank Mod Pack 1.9.3 - what's new:
+Hank Mod Pack 1.9.4 - what's new:
+- The update message on the game menu now resizes to the window font.
 - New: window fonts. Pick the font of the pack's windows (quick menu, effects window, HUD, messages) among 48 fonts: the game's own, the Mod Tool's and Windows'. They come with the mod. Themes window: L2 / R2 change the font (L1 / R1 the theme); also in Options > Mods > HUD > Window font.
 - Fixed: the replay editor, Follow cam and POV disappearing after opening another replay.
 - Fixed: Follow cam and POV settings (orbit, reactivity, lead-ahead, shake, smoothing, stabilizer, eye offsets...) now blend between keyframes; the effects window edits the keyframe at the playhead.

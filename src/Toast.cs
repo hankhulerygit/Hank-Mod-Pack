@@ -20,7 +20,7 @@ internal static class Toast
         {
             try
             {
-                var font = TextBanner.FindFont();
+                var font = HankFonts.Get();
                 if (font == 0)
                 {
                     // The game's fonts are not there yet (still loading): try again a few seconds later.
@@ -42,17 +42,6 @@ internal static class Toast
                 try { canvasW = ScreenLayout.CanvasSize().Width; } catch { }
                 var left = Math.Max(20f, canvasW - width - 40f);
                 var top = new Vector2(0f, 1f);   // from the top-left corner: the panel stays clear of the game menu and does not depend on the canvas width
-                using (var bg = OwnedGameObject.Create("Panel"))
-                {
-                    var img = bg.AddComponent("UnityEngine.UI.Image");
-                    UnityProperties.Set(img, "set_raycastTarget", false);
-                    try { UnityProperties.Set(img, "set_color", new Color(0.03f, 0.03f, 0.06f, 0.95f)); } catch { }
-                    var r = Unity.Call(img, "get_rectTransform");
-                    UnityProperties.Set(r, "set_anchorMin", top); UnityProperties.Set(r, "set_anchorMax", top); UnityProperties.Set(r, "set_pivot", top);
-                    UnityProperties.Set(r, "set_anchoredPosition", new Vector2(left, -30));
-                    UnityProperties.Set(r, "set_sizeDelta", new Vector2(width, panelH));
-                    bg.AttachTo(root.Transform);
-                }
                 using var child = OwnedGameObject.Create("Text");
                 var tmp = child.AddComponent("TMPro.TextMeshProUGUI");
                 Unity.Call(tmp, "set_font", font);
@@ -86,7 +75,26 @@ internal static class Toast
                 UnityProperties.Set(rect, "set_anchorMax", top);
                 UnityProperties.Set(rect, "set_pivot", top);
                 UnityProperties.Set(rect, "set_anchoredPosition", new Vector2(left + 15f, -46));
+                UnityProperties.Set(rect, "set_sizeDelta", new Vector2(width - 30f, 1000f));
+                // The panel follows the real text height, so every window font fits (wide fonts wrap onto more lines).
+                try
+                {
+                    var measured = Unity.Call<float>(tmp, "get_preferredHeight");
+                    if (measured > 1f) panelH = Math.Max(good ? 48f : 70f, 16f + measured + 16f + (action ? 56f : 0f));
+                }
+                catch { }
                 UnityProperties.Set(rect, "set_sizeDelta", new Vector2(width - 30f, panelH - (good ? 20f : 30f) - (action ? 56f : 0f)));
+                using (var bg = OwnedGameObject.Create("Panel"))
+                {
+                    var img = bg.AddComponent("UnityEngine.UI.Image");
+                    UnityProperties.Set(img, "set_raycastTarget", false);
+                    try { UnityProperties.Set(img, "set_color", new Color(0.03f, 0.03f, 0.06f, 0.95f)); } catch { }
+                    var r = Unity.Call(img, "get_rectTransform");
+                    UnityProperties.Set(r, "set_anchorMin", top); UnityProperties.Set(r, "set_anchorMax", top); UnityProperties.Set(r, "set_pivot", top);
+                    UnityProperties.Set(r, "set_anchoredPosition", new Vector2(left, -30));
+                    UnityProperties.Set(r, "set_sizeDelta", new Vector2(width, panelH));
+                    bg.AttachTo(root.Transform);
+                }
                 child.AttachTo(root.Transform);
                 if (action) ActionRow(font, left, width, 30f + panelH - 58f);
                 Task.Delay(TimeSpan.FromSeconds(seconds)).ContinueWith(_ => MainThread.Run(() => { if (serial == my) Hide(); }));

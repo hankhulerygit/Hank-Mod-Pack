@@ -1,5 +1,11 @@
 # Hank Mod Pack changelog
 
+## 1.9.4
+
+### Changed
+- The update message on the game menu now resizes to its text, so every window font fits (wide fonts wrap onto more lines and the panel grows).
+- overview.png: new Replay Camera card and updated cards (fonts, weather and lights, updates).
+
 ## 1.9.3
 
 ### Added
