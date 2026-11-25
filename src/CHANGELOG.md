@@ -1,5 +1,10 @@
 # Hank Mod Pack changelog
 
+## 1.8.6
+
+### Fixed
+- Replay editor / Follow cam / POV disappearing after opening another replay: the game can throw a native error in its camera update while a replay loads, which made the game bypass the pack's camera hook until restart. The error is now absorbed and the hook stays active.
+
 ## 1.8.5
 
 ### Changed

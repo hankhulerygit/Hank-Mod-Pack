@@ -11,6 +11,7 @@ internal sealed class CameraCallbacks
         public bool Failed { get; set; }
     }
 
+    int originalFailures;
     readonly List<Entry> entries = new();
     Entry[] ordered = Array.Empty<Entry>();
     public static CameraCallbacks Follow { get; } = new();
@@ -41,7 +42,15 @@ internal sealed class CameraCallbacks
         var snapshot = Volatile.Read(ref ordered);
         foreach (var entry in snapshot) Run(entry, entry.Before, camera);
         // A feature cannot swallow, defer, or accidentally call the game's update twice.
-        original();
+        // The game's camera update can throw a native exception while a replay / map is being loaded. If that crossed this callback the SDK
+        // would bypass the hook for good (Follow cam, POV, the replay editor camera... all gone until the game restarts), so it is absorbed here.
+        try { original(); }
+        catch (Exception error)
+        {
+            if (Interlocked.Increment(ref originalFailures) <= 3)
+            { try { Jibbers.Sdk.Log.Info("hank_mod_pack", $"camera hook: the game's camera update threw ({error.GetType().Name}); ignored, the hook stays active"); } catch { } }
+            return;
+        }
         foreach (var entry in snapshot) Run(entry, entry.After, camera);
     }
 

@@ -14,10 +14,12 @@ Options > Mods only lists the settings that have no other place. See
 [docs/HANK-MOD-PACK.md](../../../docs/HANK-MOD-PACK.md) for the full guide and
 [CHANGELOG.md](CHANGELOG.md) for what changed.
 
-Settings are saved in `JibbersMods/Hank Mod Pack/Settings/<mod name>.json` (one file per mod). On first
-launch after updating, values are moved there and the old `JibbersMods/<id>.settings.json` files are removed. The game's normal stance action remains authoritative: holding D-pad down
-does not rewind the rider's internal state. Cameras yield to the game's other camera modes,
-including FPV Drone and photo mode.
+**Version 1.6.4.** **Updates:** at launch the pack checks its own GitHub repository (`update/HankModPack.dll`). On the game menu, a message shows what changed; **Triangle** (pad)
+or **Alt Gr** (keyboard) installs it, used from the next launch. `JibbersMods/Hank Mod Pack/update.json` sets `ask` (default), `auto` (installs by itself) or `off`.
+
+Everything the pack writes is in `JibbersMods/Hank Mod Pack` (settings in `Settings/<mod name>.json`, one file per mod). On the first launch after
+updating, loose files from earlier versions are moved there and the old `JibbersMods/<id>.settings.json` files are imported and removed. The game's normal stance action
+remains authoritative: holding D-pad down does not rewind the rider's internal state. Cameras yield to the game's other camera modes, including FPV Drone and photo mode.
 
 **Improved Spawn is included in this pack**, using the existing `join_spawn` settings ID.
 It contains Hank's newer spawn menu, spectator camera, camera styles and input blocking.

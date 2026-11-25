@@ -1,7 +1,7 @@
 # Hank Mod Pack guide
 
 Hank Mod Pack is one DLL with eleven entries in Options > Mods, all named `Hank Mod Pack: ...`.
-This guide covers how to use it. See `mods/cs/HankModPack/CHANGELOG.md` for changes.
+This guide covers how to use it (version 1.6.4). See `mods/cs/HankModPack/CHANGELOG.md` for changes.
 
 ## Quick menu
 
@@ -71,13 +71,20 @@ The setting is "Improved on-foot camera" (Off / Auto after detaching / Always).
 R2 opens the effects window while a keyframe panel is open (L2 held = bigger steps). Sony pads get PlayStation button pictures.
 The POV camera hides the rider's head (re-checked while it plays).
 
+The F3 environment menu is also in the effects window and in the keyframe panel (the mod opens it invisibly when a replay starts, so F3 never has to be pressed):
+
+- **Weather**: time of day, sun and moon keyframes and the time speed, then the sub-tabs Sun, Moon, Clouds, Snowfall, Fog and Powder.
+- **Lights**: the sub-tabs Map Lights, Head Lamp and Cam Lamp, each with red / green / blue, intensity and range. Cam Lamp also has the on / off switch (the game's own lamp).
+
+In the effects window, the first row of these two tabs (Section / Lamp) switches between the sub-tabs with left / right. These settings apply live and are put back when the replay ends.
+
 ## Updates from GitHub
 
 At launch the pack checks `update/HankModPack.dll` in its own GitHub repository. On the game menu, a message shows what changed; press **Triangle** (pad) or
 **Alt Gr** (keyboard) to install it. It is used from the next launch of the game. Nothing in the quick menu: updates are only offered on the game menu.
 
 - `JibbersMods/Hank Mod Pack/update.json`: `ask` (default), `auto` (installs by itself) or `off` (never checks).
-- Nothing is shown when the pack is up to date. A failed update says why (for example HTTP 404: repository or file not found).
+- When the pack is up to date, a small green message says so with its version. A failed update says why (for example HTTP 404: repository or file not found).
 - Installing removes older copies of the pack and the standalone DLLs of the mods it replaces.
 
 ## Files

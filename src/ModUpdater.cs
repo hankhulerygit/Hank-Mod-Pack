@@ -34,7 +34,7 @@ internal static class ModUpdater
 
     /// <summary>The version the running DLL has (from its assembly), e.g. "1.52.9".</summary>
     /// <summary>The version of the pack, shown after "up to date" and after an update. Raised with every release.</summary>
-    internal const string Version = "1.8.5";
+    internal const string Version = "1.8.6";
 
     internal static string StatusText => State switch
     {
