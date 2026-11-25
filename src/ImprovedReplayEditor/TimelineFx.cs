@@ -2516,16 +2516,16 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
                 CamTop("Follow cam");
                     RcChoice("Shot preset", "cam_style", () => rc.CamStyle, "Behind", "Side (right)", "Side (left)", "Front", "Drone", "Skate fisheye", "Low chase", "In-game camera", "In-game drone", "Custom");
                     CamKey("Follow cam", "Angle around the rider (180 = behind)", "Angle", 0f, 360f, 5f, 0, () => rc.CamAngle);
-                    RcSlider("Orbit around the rider (deg/s)", "cam_sweep", -90f, 90f, 1f, 0, () => rc.CamSweep);
+                    CamKey("Follow cam", "Orbit around the rider (deg/s)", "Sweep", -90f, 90f, 1f, 0, () => rc.CamSweep);
                     CamKey("Follow cam", "Distance (m)", "Distance", 0.8f, 30f, 0.1f, 1, () => rc.CamDistance);
                     CamKey("Follow cam", "Height (m)", "Height", -2f, 15f, 0.1f, 1, () => rc.CamHeight);
                     CamKey("Follow cam", "Aim height on the rider (m)", "Aim", -0.5f, 2f, 0.05f, 2, () => rc.CamAim);
                     CamKey("Follow cam", "Keep the rider in frame (%)", "Focus", 0f, 100f, 5f, 0, () => rc.CamFocus);
                     CamKey("Follow cam", "Tilt / dutch angle (deg)", "Roll", -45f, 45f, 1f, 0, () => rc.CamRoll);
-                    RcSlider("Reactivity", "cam_react", 0.5f, 12f, 0.5f, 1, () => rc.CamReactivity);
-                    RcSlider("Lead-ahead (%)", "cam_lead", 0f, 100f, 5f, 0, () => rc.CamLead);
-                    RcSlider("Pull back with speed (%)", "cam_pull", 0f, 100f, 5f, 0, () => rc.CamPull);
-                    RcSlider("Hand-held shake (%)", "cam_shake", 0f, 100f, 5f, 0, () => rc.CamShake);
+                    CamKey("Follow cam", "Reactivity", "React", 0.5f, 12f, 0.5f, 1, () => rc.CamReactivity);
+                    CamKey("Follow cam", "Lead-ahead (%)", "Lead", 0f, 100f, 5f, 0, () => rc.CamLead);
+                    CamKey("Follow cam", "Pull back with speed (%)", "Pull", 0f, 100f, 5f, 0, () => rc.CamPull);
+                    CamKey("Follow cam", "Hand-held shake (%)", "Shake", 0f, 100f, 5f, 0, () => rc.CamShake);
                     menu.Info(GS(() => FisheyeInfo()), false, null, 0f);
                     RcToggle("Fisheye", "cam_fisheye", () => rc.CamFisheye);
                     CamKey("Follow cam", "Fisheye strength (%)", "FisheyeStrength", 0f, 100f, 5f, 0, () => rc.FisheyeStrength);
@@ -2541,19 +2541,19 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
                     RcChoice("Aim from", "pov_base", () => rc.PovBase, "Shoulders", "Chest", "Hips", "Head");
                     CamKey("POV", "Horizon height in the frame (% from top)", "PovHorizon", 15f, 70f, 1f, 0, () => rc.PovHorizon);
                     CamKey("POV", "Look up / down (deg)", "PovPitch", -30f, 30f, 1f, 0, () => rc.PovPitch);
-                    RcSlider("Over-the-shoulder look in switch (%)", "pov_shoulder", 0f, 100f, 5f, 0, () => rc.PovShoulder);
+                    CamKey("POV", "Over-the-shoulder look in switch (%)", "PovShoulder", 0f, 100f, 5f, 0, () => rc.PovShoulder);
                     CamKey("POV", "Shift towards the shoulder in switch (m)", "PovShift", 0f, 0.6f, 0.01f, 2, () => rc.PovShift);
-                    RcSlider("Max head turn over the shoulder (deg)", "pov_neck", 30f, 180f, 5f, 0, () => rc.PovNeckTurn);
-                    RcSlider("Calm the view in the air (%)", "pov_airstab", 0f, 100f, 5f, 0, () => rc.PovAirStab);
-                    RcSlider("Look along the slope (%)", "pov_slope", 0f, 100f, 5f, 0, () => rc.PovSlope);
-                    RcSlider("Torso lean influence (%)", "pov_headpitch", 0f, 100f, 5f, 0, () => rc.PovHeadPitch);
-                    RcSlider("Body turn influence (%)", "pov_headyaw", 0f, 100f, 5f, 0, () => rc.PovHeadYaw);
-                    RcSlider("Max look up / down (deg)", "pov_maxpitch", 5f, 90f, 1f, 0, () => rc.PovMaxPitch);
-                    RcSlider("Smoothing (%)", "pov_smooth", 0f, 95f, 5f, 0, () => rc.PovSmooth);
-                    RcSlider("Speed FOV boost (deg)", "pov_boost", 0f, 30f, 1f, 0, () => rc.PovBoost);
-                    RcSlider("Head shake (%)", "pov_shake", 0f, 100f, 5f, 0, () => rc.PovShake);
-                    RcSlider("Eye forward offset (m)", "pov_fwd", -0.3f, 0.6f, 0.01f, 2, () => rc.PovForward);
-                    RcSlider("Eye up offset (m)", "pov_up", -0.6f, 0.4f, 0.01f, 2, () => rc.PovUp);
+                    CamKey("POV", "Max head turn over the shoulder (deg)", "PovNeck", 30f, 180f, 5f, 0, () => rc.PovNeckTurn);
+                    CamKey("POV", "Calm the view in the air (%)", "PovAirStab", 0f, 100f, 5f, 0, () => rc.PovAirStab);
+                    CamKey("POV", "Look along the slope (%)", "PovSlope", 0f, 100f, 5f, 0, () => rc.PovSlope);
+                    CamKey("POV", "Torso lean influence (%)", "PovHeadPitch", 0f, 100f, 5f, 0, () => rc.PovHeadPitch);
+                    CamKey("POV", "Body turn influence (%)", "PovHeadYaw", 0f, 100f, 5f, 0, () => rc.PovHeadYaw);
+                    CamKey("POV", "Max look up / down (deg)", "PovMaxPitch", 5f, 90f, 1f, 0, () => rc.PovMaxPitch);
+                    CamKey("POV", "Smoothing (%)", "PovSmooth", 0f, 95f, 5f, 0, () => rc.PovSmooth);
+                    CamKey("POV", "Speed FOV boost (deg)", "PovBoost", 0f, 30f, 1f, 0, () => rc.PovBoost);
+                    CamKey("POV", "Head shake (%)", "PovShake", 0f, 100f, 5f, 0, () => rc.PovShake);
+                    CamKey("POV", "Eye forward offset (m)", "PovFwd", -0.3f, 0.6f, 0.01f, 2, () => rc.PovForward);
+                    CamKey("POV", "Eye up offset (m)", "PovUp", -0.6f, 0.4f, 0.01f, 2, () => rc.PovUp);
                     RcToggle("Hide the rider's head and helmet", "pov_hide", () => rc.PovHideHead);
                     RcToggle("Fisheye", "pov_fisheye", () => rc.PovFisheye);
                     CamKey("POV", "Fisheye strength (%)", "FisheyeStrength", 0f, 100f, 5f, 0, () => rc.FisheyeStrength);
@@ -2701,7 +2701,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         ("Follow cam", new Color(1f, 1f, 1f, 1f)),
         ("POV", new Color(0.75f, 0.55f, 1f, 1f)),
         ("Lights", new Color(1f, 0.85f, 0.55f, 1f)),
-        ("Keyframes", new Color(0.7f, 0.7f, 0.7f, 1f)),
+        ("Keyframes settings", new Color(0.7f, 0.7f, 0.7f, 1f)),
     };
 
     static int TabMask(KfData d)
@@ -2926,7 +2926,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
                 }
                 return r;
             });
-            sections.Add(("Keyframes", kfRows, null));
+            sections.Add(("Keyframes settings", kfRows, null));
         }
         {
             var sh = EvalShake();
@@ -2945,8 +2945,18 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         if (HankModPack.ReplayCameraMod.Instance is { } rcm)
         {
             // The replay camera's own settings (the same sliders as the Follow cam / POV tabs of the keyframe panel).
+            var camKeyOf = new Dictionary<string, string> { ["cam_angle"] = "Angle", ["cam_dist"] = "Distance", ["cam_height"] = "Height", ["cam_aim"] = "Aim", ["cam_roll"] = "Roll", ["cam_focus"] = "Focus",
+["cam_sweep"] = "Sweep", ["cam_react"] = "React", ["cam_lead"] = "Lead", ["cam_pull"] = "Pull", ["cam_shake"] = "Shake", ["pov_smooth"] = "PovSmooth", ["pov_stab"] = "PovStab", ["pov_boost"] = "PovBoost", ["pov_shake"] = "PovShake", ["pov_fwd"] = "PovFwd", ["pov_up"] = "PovUp", ["pov_maxpitch"] = "PovMaxPitch", ["pov_slope"] = "PovSlope", ["pov_headpitch"] = "PovHeadPitch", ["pov_headyaw"] = "PovHeadYaw", ["pov_shoulder"] = "PovShoulder", ["pov_neck"] = "PovNeck", ["pov_airstab"] = "PovAirStab" };
+            // Every number of the Follow cam / POV is an effect keyframe value: shown as it is at the playhead, and a change is written into the keyframe there (so it blends between keyframes).
             List<WRow> CamRows(params (string Label, string Key, float Min, float Max, float Step, int Dec)[] defs)
-                => defs.Select(d => Sl(d.Label, (float)rcm.GetDouble(d.Key), d.Min, d.Max, d.Step, d.Dec, false, v => { rcm.Set(d.Key, v); KfMark(); })).ToList();
+                => defs.Select(d =>
+                {
+                    if (!camKeyOf.TryGetValue(d.Key, out var ck))
+                        return Sl(d.Label, (float)rcm.GetDouble(d.Key), d.Min, d.Max, d.Step, d.Dec, false, v => { rcm.Set(d.Key, v); KfMark(); });
+                    var label = "Cam/" + ck; var tab = d.Key.StartsWith("pov_") ? "POV" : "Follow cam";
+                    var cur = Selected() is { } sk && sk.D.Fx.TryGetValue(label, out var sv) ? sv : (EvalSky(label) ?? (float)rcm.GetDouble(d.Key));
+                    return Sl(d.Label, cur, d.Min, d.Max, d.Step, d.Dec, false, v => { var k = SelOrCreate(); EnsureCam(k, tab); k.D.Fx[label] = v; dirty = true; SyncKeyframes(); });
+                }).ToList();
             WRow Ch(string label, string key, params string[] opts)
             {
                 var cur = rcm.GetString(key);
@@ -3053,6 +3063,8 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
             if (rows.Count > 0) sections.Add(("Alpine Vision", rows, null));
         }
 
+        // The keyframe presets tab is always the last one.
+        { var ki = sections.FindIndex(x => x.Title == "Keyframes settings"); if (ki >= 0 && ki != sections.Count - 1) { var it = sections[ki]; sections.RemoveAt(ki); sections.Add(it); } }
         var tabs = sections.Count;
         fxTab = Math.Clamp(fxTab, 0, tabs - 1);
         // Is the tab part of the keyframe under the playhead? (the dot of the list)
@@ -3076,7 +3088,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
             if (inp.A) row.Next?.Invoke();
             if (inp.B) { if (fxSub != "") { fxSub = ""; fxSel = 0; } else { fxInTab = false; fxSel = fxTab; } }
         }
-        var kfSection = sections[fxTab].Title == "Keyframes";
+        var kfSection = sections[fxTab].Title == "Keyframes settings";
         if (inp.X && !kfSection) { AddTab(sections[fxTab].Title, sections[fxTab].Members); Log($"TLFX: effect window: '{sections[fxTab].Title}' keyframe added"); }
         if (inp.Y && !kfSection) ClearTab(sections[fxTab].Title);
         // L3: copy this tab of the keyframe to the next one; R3: to all the keyframes after it.

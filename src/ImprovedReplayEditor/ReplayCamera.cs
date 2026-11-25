@@ -300,6 +300,7 @@ public sealed unsafe class ReplayCameraMod : PackPart
             ["Cam/Roll"] = CamRoll, ["Cam/Focus"] = CamFocus, ["Cam/FisheyeStrength"] = FisheyeStrength,
             ["Cam/TimeScale"] = 1f, ["Cam/PovTimeScale"] = 1f,
             ["Cam/PovHorizon"] = PovHorizon, ["Cam/PovShift"] = PovShift, ["Cam/PovPitch"] = PovPitch,
+            ["Cam/Sweep"] = CamSweep, ["Cam/React"] = CamReactivity, ["Cam/Lead"] = CamLead, ["Cam/Pull"] = CamPull, ["Cam/Shake"] = CamShake, ["Cam/PovSmooth"] = PovSmooth, ["Cam/PovStab"] = PovStab, ["Cam/PovBoost"] = PovBoost, ["Cam/PovShake"] = PovShake, ["Cam/PovFwd"] = PovForward, ["Cam/PovUp"] = PovUp, ["Cam/PovMaxPitch"] = PovMaxPitch, ["Cam/PovSlope"] = PovSlope, ["Cam/PovHeadPitch"] = PovHeadPitch, ["Cam/PovHeadYaw"] = PovHeadYaw, ["Cam/PovShoulder"] = PovShoulder, ["Cam/PovNeck"] = PovNeckTurn, ["Cam/PovAirStab"] = PovAirStab,
         };
     }
 
@@ -755,27 +756,27 @@ public sealed unsafe class ReplayCameraMod : PackPart
         var level = Math.Clamp(kmh / 150f, 0, 1);
 
         var focusAmt = Math.Clamp(K("Focus", CamFocus) / 100f, 0, 1);
-        sweepDeg += CamSweep * dt;
+        sweepDeg += K("Sweep", CamSweep) * dt;
         var offset = K("Angle", CamAngle) + sweepDeg;
-        var dist = K("Distance", CamDistance) * (1 + CamPull / 100f * level * 0.6f);
+        var dist = K("Distance", CamDistance) * (1 + K("Pull", CamPull) / 100f * level * 0.6f);
 
         if (camPos is null) yawDeg = Wrap(offset);
         if (flat > 1.5f)
         {
             var heading = MathF.Atan2(vel.X, vel.Z) * 180 / MathF.PI;
-            yawDeg += Wrap(heading + offset - yawDeg) * (1 - MathF.Exp(-CamReactivity * 0.7f * dt));
+            yawDeg += Wrap(heading + offset - yawDeg) * (1 - MathF.Exp(-K("React", CamReactivity) * 0.7f * dt));
         }
         else
-            yawDeg += Wrap(lastHeading + offset - yawDeg) * (1 - MathF.Exp(-CamReactivity * 0.7f * dt));   // stopped: keep the shot, only the orbit moves
+            yawDeg += Wrap(lastHeading + offset - yawDeg) * (1 - MathF.Exp(-K("React", CamReactivity) * 0.7f * dt));   // stopped: keep the shot, only the orbit moves
         if (flat > 1.5f) lastHeading = MathF.Atan2(vel.X, vel.Z) * 180 / MathF.PI;
 
         var yr = yawDeg * MathF.PI / 180;
         var desired = new Vector3(focus.X + MathF.Sin(yr) * dist, focus.Y + K("Height", CamHeight), focus.Z + MathF.Cos(yr) * dist);
 
         var aim = focus;
-        if (flat > 1.0f && CamLead > 0)
+        if (flat > 1.0f && K("Lead", CamLead) > 0)
         {
-            var lead = Math.Clamp(flat * 0.18f, 0, 5) * (CamLead / 100f) * (1 - 0.7f * focusAmt);
+            var lead = Math.Clamp(flat * 0.18f, 0, 5) * (K("Lead", CamLead) / 100f) * (1 - 0.7f * focusAmt);
             aim = new Vector3(focus.X + vel.X / flat * lead, focus.Y, focus.Z + vel.Z / flat * lead);
         }
 
@@ -786,13 +787,13 @@ public sealed unsafe class ReplayCameraMod : PackPart
         }
         else
         {
-            camPos = Lerp(cp, desired, 1 - MathF.Exp(-CamReactivity * dt));
+            camPos = Lerp(cp, desired, 1 - MathF.Exp(-K("React", CamReactivity) * dt));
             lookPt = Lerp(lookPt ?? aim, aim, 1 - MathF.Exp(-(8 + 24 * focusAmt) * dt));
         }
 
         var pos = camPos.Value;
         var look = lookPt!.Value;
-        var amp = CamShake / 100f * (1 + Extra("x_speedshake") / 100f * level * 2.5f);
+        var amp = K("Shake", CamShake) / 100f * (1 + Extra("x_speedshake") / 100f * level * 2.5f);
         if (amp > 0)
         {
             swayClock += dt;
@@ -1139,7 +1140,7 @@ public sealed unsafe class ReplayCameraMod : PackPart
     }
 
     /// <summary>Per-frame blend factor of the stabilizer: a time constant of 0.6 s x stab squared (100 % = a 0.6 s lag, so the view still follows the body).</summary>
-    float StabK(float dt) { var st = Math.Clamp(PovStab / 100f, 0, 1); var tau = MathF.Max(0.6f * st * st, 0.01f); return 1 - MathF.Exp(-dt / tau); }
+    float StabK(float dt) { var st = Math.Clamp(K("PovStab", PovStab) / 100f, 0, 1); var tau = MathF.Max(0.6f * st * st, 0.01f); return 1 - MathF.Exp(-dt / tau); }
 
     bool ComputePov(nint cam)
     {
@@ -1187,14 +1188,14 @@ public sealed unsafe class ReplayCameraMod : PackPart
         var leanDeg = lean ? MathF.Asin(Math.Clamp(bodyF.Y, -1, 1)) * 180 / MathF.PI : 0f;
         var bfm = MathF.Sqrt(bodyF.X * bodyF.X + bodyF.Z * bodyF.Z);
         var yawBody = bfm > 0.25f ? MathF.Atan2(bodyF.X, bodyF.Z) * 180 / MathF.PI : yawGo;
-        var maxP = PovMaxPitch;
+        var maxP = K("PovMaxPitch", PovMaxPitch);
         // Horizon in the frame: 50 = centred, lower = the horizon sits higher in the picture (the camera looks a little below it).
         var vf = Math.Clamp(fovShown < 5 ? K("PovFov", PovFov) : fovShown, 30f, 130f) * MathF.PI / 180;
         var horizonOffset = -MathF.Atan((0.5f - Math.Clamp(K("PovHorizon", PovHorizon) / 100f, 0.1f, 0.9f)) * 2 * MathF.Tan(vf / 2)) * 180 / MathF.PI;
 
         if (lock_ == "Travel direction")
         {
-            var pitch = Math.Clamp(slopePitch * PovSlope / 100f + horizonOffset, -maxP, maxP);
+            var pitch = Math.Clamp(slopePitch * K("PovSlope", PovSlope) / 100f + horizonOffset, -maxP, maxP);
             fwd = Dir(yawGo, pitch);
             up = worldUp;
         }
@@ -1213,21 +1214,21 @@ public sealed unsafe class ReplayCameraMod : PackPart
                 }
                 else if (flat < 1.5f) inSwitch = false;
             }
-            var target = inSwitch ? PovShoulder / 100f : 0f;
+            var target = inSwitch ? K("PovShoulder", PovShoulder) / 100f : 0f;
             shoulder += (target - shoulder) * (1 - MathF.Exp(-5 * dt));
 
             // Wanted heading: the shoulders' heading. In switch the head turns over the shoulder towards the travel, within the neck limit.
-            var yawT = yawBody + Math.Clamp(offGo, -PovNeckTurn, PovNeckTurn) * shoulder;
-            yawT = yawGo + Wrap(yawT - yawGo) * (PovHeadYaw / 100f);
-            yawT += Wrap(yawGo - yawT) * (PovAirStab / 100f * airScore);   // in the air: mostly along the travel
+            var yawT = yawBody + Math.Clamp(offGo, -K("PovNeck", PovNeckTurn), K("PovNeck", PovNeckTurn)) * shoulder;
+            yawT = yawGo + Wrap(yawT - yawGo) * (K("PovHeadYaw", PovHeadYaw) / 100f);
+            yawT += Wrap(yawGo - yawT) * (K("PovAirStab", PovAirStab) / 100f * airScore);   // in the air: mostly along the travel
 
-            var pitchT = slopePitch * PovSlope / 100f + leanDeg * PovHeadPitch / 100f + horizonOffset;
+            var pitchT = slopePitch * K("PovSlope", PovSlope) / 100f + leanDeg * K("PovHeadPitch", PovHeadPitch) / 100f + horizonOffset;
             pitchT = Math.Clamp(pitchT, -maxP, maxP);
 
             // Smoothing and a limit on the turning speed, so the view never whips around.
             if (!yawInit) { yawView = yawT; pitchView = pitchT; yawInit = true; }
-            var sk = 1 - MathF.Pow(Math.Clamp(PovSmooth / 100f, 0, 0.95f), dt * 30);
-            if (PovStab > 0) sk = MathF.Min(sk, StabK(dt));   // stabilizer: slows the shakes, but the view still turns with the body (at most ~0.6 s of lag at 100 %)
+            var sk = 1 - MathF.Pow(Math.Clamp(K("PovSmooth", PovSmooth) / 100f, 0, 0.95f), dt * 30);
+            if (K("PovStab", PovStab) > 0) sk = MathF.Min(sk, StabK(dt));   // stabilizer: slows the shakes, but the view still turns with the body (at most ~0.6 s of lag at 100 %)
             var yawRate = 900f;   // the view must follow spins and flips of the body
             var dy = Math.Clamp(Wrap(yawT - yawView) * sk, -yawRate * dt, yawRate * dt);
             yawView = Wrap(yawView + dy);
@@ -1262,8 +1263,8 @@ public sealed unsafe class ReplayCameraMod : PackPart
         }
 
         // Softening: 0 = locked to the head.
-        var stab = Math.Clamp(PovStab / 100f, 0, 1);
-        var smooth = Math.Clamp(PovSmooth / 100f, 0, 0.95f);
+        var stab = Math.Clamp(K("PovStab", PovStab) / 100f, 0, 1);
+        var smooth = Math.Clamp(K("PovSmooth", PovSmooth) / 100f, 0, 0.95f);
         if (stab > 0) up = Norm(Lerp(up, worldUp, stab * 0.85f), up);   // gimbal: the horizon stays level
         if (lock_ != "Real (look where you go)" && povF is { } pf && povU is { } pu && (smooth > 0 || stab > 0) && Dot(pf, fwd) > -0.5f)
         {
@@ -1276,9 +1277,9 @@ public sealed unsafe class ReplayCameraMod : PackPart
 
         // Body movement of the eye: small bob and sway, stronger with speed.
         shiftNow += (shiftTarget - shiftNow) * (1 - MathF.Exp(-6 * dt));
-        var pos = Add(Add(Add(hp, Mul(fwd, PovForward)), Mul(up, PovUp)), Mul(bodyRight, shiftNow));
+        var pos = Add(Add(Add(hp, Mul(fwd, K("PovFwd", PovForward))), Mul(up, K("PovUp", PovUp))), Mul(bodyRight, shiftNow));
         var look = fwd; var upv = up;
-        var amp = PovShake / 100f * (0.5f + 0.5f * speed01) * (1 - 0.8f * stab);
+        var amp = K("PovShake", PovShake) / 100f * (0.5f + 0.5f * speed01) * (1 - 0.8f * stab);
         if (amp > 0.001f)
         {
             swayClock += dt * (1.6f + 2.5f * speed01);
@@ -1298,7 +1299,7 @@ public sealed unsafe class ReplayCameraMod : PackPart
         if (!PlayActive) { fovShown = GameFov(); poseFov = 0; }   // replay: the game's own FOV keyframes decide
         else
         {
-            var wanted = K("PovFov", PovFov) + PovBoost * speed01 + (PovFisheye ? FisheyeFov : 0);
+            var wanted = K("PovFov", PovFov) + K("PovBoost", PovBoost) * speed01 + (PovFisheye ? FisheyeFov : 0);
             wanted = Math.Clamp(wanted, 30, 150);
             if (fovShown < 5) fovShown = wanted;
             fovShown += (wanted - fovShown) * (1 - MathF.Exp(-6 * dtf));

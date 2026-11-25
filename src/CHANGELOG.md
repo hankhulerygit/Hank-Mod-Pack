@@ -1,5 +1,16 @@
 # Hank Mod Pack changelog
 
+## 1.8.5
+
+### Changed
+- Effects window (R2): the keyframe presets tab is now called **Keyframes settings** and is the last tab.
+
+## 1.8.4
+
+### Fixed
+- Follow cam and POV: every number (orbit, reactivity, lead-ahead, pull back, shake, smoothing, stabilizer, speed FOV boost, eye offsets, look limits, shoulder and head settings...) is now an effect keyframe value and blends between keyframes. Before, only a few (angle, distance, height, aim, tilt, focus, horizon, shift, pitch, FOV) did.
+- Effects window (R2): the Follow cam / POV sliders now show and edit the keyframe value at the playhead instead of the global setting that keyframes override.
+
 ## 1.8.3
 
 ### Fixed
