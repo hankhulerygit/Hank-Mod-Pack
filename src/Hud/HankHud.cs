@@ -32,6 +32,10 @@ public sealed class HankHudMod : PackPart
         Key = "theme", Tooltip = "Colours and shape of the two windows.")]
     public string Theme { get; private set; } = "White";
 
+    [Choice("Window font", "Game default", "Game default", "Lacquer", "Roboto", "Roboto Bold", "Liberation Sans", "Inconsolata", "Geologica", "Perfect DOS", "Audiowide", "Bangers", "Black Ops One", "Bowlby One SC", "Bungee", "Bungee Shade", "Chango", "Creepster", "Faster One", "Fredericka the Great", "Gloria Hallelujah", "Kaushan Script", "Knewave", "Lilita One", "Lobster", "Londrina Solid", "Monoton", "Nosifer", "Orbitron", "Pacifico", "Paytone One", "Permanent Marker", "Press Start 2P", "Righteous", "Rock Salt", "Rubik Glitch", "Rubik Spray Paint", "Rubik Wet Paint", "Russo One", "Sedgwick Ave Display", "Shrikhand", "Special Elite", "Squada One", "Titan One", "Ultra", "Arial Black", "Impact", "Georgia", "Courier New", "Trebuchet MS", "Verdana",
+        Key = "font", Tooltip = "Font of the pack's windows (HUD, quick menu, effects window, messages). The fonts come with the mod. Also changed in the Themes window (L2 / R2).")]
+    public string FontName { get; private set; } = "Game default";
+
     [Toggle("Hide HUD when a menu is open", true, Key = "hide_menus",
         Tooltip = "Hides the HUD while an interface is open in game (/place, pause menu...). It stays visible in Options > Mods so you can pick the theme.")]
     public bool HideOnMenus { get; private set; }
@@ -104,6 +108,15 @@ public sealed class HankHudMod : PackPart
     /// Picks the next / previous theme (quick menu: L1 / R1). The HUD is rebuilt only once the presses stop for a moment,
     /// so going quickly through several themes does not rebuild the windows (and their flames) for each press.
     /// </summary>
+    /// <summary>Picks the next / previous window font (Themes window: D-pad left / right).</summary>
+    public void CycleFont(int step)
+    {
+        var f = HankFonts.Neighbour(step);
+        HankFonts.Pick(f);
+        try { SetSetting("font", System.Text.Json.Nodes.JsonValue.Create(f)!); Log($"HUD: window font -> {f}"); }
+        catch (Exception e) { Log("HUD: could not change the font: " + e.Message); }
+    }
+
     public void CycleTheme(int step)
     {
         pendingTheme = NeighbourTheme(step);
@@ -129,13 +142,13 @@ public sealed class HankHudMod : PackPart
         ImportPackSettings();
         Instance = this;
         Jibbers.Sdk.Game.Event.ChangeScene.Subscribe(_ => OnDeactivated());
-        EnvManager.UpdateMethod.Before((_, _) => Frame());
+        EnvManager.UpdateMethod.Before((_, _) => { HankFonts.Tick(); Frame(); });
         Log("HUD ready.");
     }
 
     protected override void OnPackSettingChanged(string key, JsonNode value)
     {
-        if (key is "scale" or "show" or "hidden" or "enabled" or "theme" or "flames") { needRebuild = true; lastBuildTry = 0; }
+        if (key is "scale" or "show" or "hidden" or "enabled" or "theme" or "font" or "flames") { needRebuild = true; lastBuildTry = 0; }
     }
 
     protected override void OnDeactivated()
@@ -392,7 +405,7 @@ public sealed class HankHudMod : PackPart
         if (lastBuildTry != 0 && Stopwatch.GetElapsedTime(lastBuildTry, now).TotalSeconds < 1) return false;
         lastBuildTry = now;
 
-        var font = TextBanner.FindFont();
+        var font = HankFonts.Get();
         if (font == 0) return false;
 
         OwnedGameObject? canvas = null;

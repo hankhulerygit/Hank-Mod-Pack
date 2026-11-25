@@ -1,5 +1,28 @@
 # Hank Mod Pack changelog
 
+## 1.9.3
+
+### Added
+- Window fonts: all the Mod Tool fonts (35, inside the DLL) and Windows' Arial Black, Impact, Georgia, Courier New, Trebuchet MS and Verdana (read from the Windows Fonts folder), 48 in all.
+
+### Changed
+- Themes window: L2 / R2 change the font (before: D-pad left / right).
+
+## 1.9.2
+
+### Fixed
+- Window fonts: the text font is now made through whichever CreateFontAsset the game has (from the font file path, or from a Unity font), choosing the values by the parameters' names; the game's signatures and each failure are written to the log.
+
+## 1.9.1
+
+### Changed
+- Window fonts now come with the mod (inside HankModPack.dll) and are made when the mod starts, one per frame, so they no longer depend on what the game has loaded. Three fonts of the Mod Tool added for testing: Bangers, Orbitron and Press Start 2P (ten in all).
+
+## 1.9.0
+
+### Added
+- Window font: the pack's windows (quick menu, effects window, HUD, messages) can use one of seven fonts that are inside the game: Lacquer, Roboto, Roboto Bold, Liberation Sans, Inconsolata, Geologica and Perfect DOS (or the game default). Pick it in the Themes window (D-pad down + the Themes button; D-pad left / right change the font) or in Options > Mods > HUD > Window font. A font the game has not loaded falls back to the default and is noted in the log.
+
 ## 1.8.6
 
 ### Fixed

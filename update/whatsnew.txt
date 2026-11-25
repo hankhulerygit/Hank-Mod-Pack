@@ -1,1 +1,10 @@
-Fixed Improved Replay Editor disapearing after opening replay editor multiple times
+Hank Mod Pack 1.9.3 - what's new:
+- Replay editor, effects window (R2): new "Keyframes" section with Save / Load / Delete of keyframe presets. Save / Load / Delete are also the last rows of the keyframe panel.
+- Replay editor: Cam Lamp switch works again (own light on the replay camera, with the F3 colour, intensity and range), and Map Lights colour keeps working.
+- Fixed a game crash when loading saved keyframes.
+- Loading a preset applies its game keyframes to the keyframes the replay already has (add them first, then load).
+- Fixed Follow cam and POV locking the game speed in the replay: Faster / Slower work again.
+- Effects window legend: "hold: more" now shows L2.
+- Fixed Follow cam and POV settings not blending between keyframes.
+- Fixed the replay editor disappearing after opening another replay.
+- New: window font. 48 fonts for the pack's windows (the game's, the Mod Tool's, Windows'), loaded with the mod. Themes window: L2 / R2 change the font; also Options > Mods > HUD > Window font.

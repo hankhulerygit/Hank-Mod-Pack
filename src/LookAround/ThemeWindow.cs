@@ -8,7 +8,7 @@ namespace HankModPack;
 /// </summary>
 public sealed unsafe partial class LookAroundMod
 {
-    bool themeOpen, themeInit, themeMuted;
+    bool themeOpen, themeInit, themeMuted, themeLt, themeRt;
     PadButton themePrev;
     HashSet<Key> themeKeysPrev = new();
 
@@ -19,7 +19,7 @@ public sealed unsafe partial class LookAroundMod
         overlay.Hide();
         Stop("theme");
         needRelease = true;
-        themeOpen = true; themeInit = false;
+        themeOpen = true; themeInit = false; themeLt = themeRt = true;   // a trigger still held from the menu does not count
         try { mute.Mute(); themeMuted = true; } catch (Exception e) { Once("theme-mute", e); }
     }
 
@@ -45,14 +45,22 @@ public sealed unsafe partial class LookAroundMod
         if (hud is null || Hit(PadButton.B) || Hit(PadButton.Start) || Hit(PadButton.Back) || fresh.Contains(Key.Escape)) { CloseTheme(); return; }
         var step = (Hit(PadButton.RightShoulder) || fresh.Contains(Key.Right) ? 1 : 0) - (Hit(PadButton.LeftShoulder) || fresh.Contains(Key.Left) ? 1 : 0);
         if (step != 0) { hud.CycleTheme(step); Log($"theme window: theme -> {hud.DisplayTheme}"); }
+        // L2 / R2 (pressed past half way, once per press) or the Up / Down arrows change the font.
+        var lt = pad.LT > 0.5f; var rt = pad.RT > 0.5f;
+        var fstep = (rt && !themeRt || fresh.Contains(Key.Down) ? 1 : 0) - (lt && !themeLt || fresh.Contains(Key.Up) ? 1 : 0);
+        themeLt = lt; themeRt = rt;
+        if (fstep != 0) { hud.CycleFont(fstep); Log($"theme window: font -> {HankFonts.Neighbour(fstep)}"); }
 
         var rows = new List<QuickMenuOverlay.Row>
         {
             new(PadBtn.LB, "Previous: " + hud.NeighbourTheme(-1), "", false, false),
             new(PadBtn.RB, "Next: " + hud.NeighbourTheme(1), "", false, false),
             new(PadBtn.A, "Selected: " + hud.DisplayTheme, "", false, true, HasIcon: false),
+            new(PadBtn.LT, "Previous font: " + HankFonts.Neighbour(-1), "", false, false),
+            new(PadBtn.RT, "Next font: " + HankFonts.Neighbour(1), "", false, false),
+            new(PadBtn.A, "Font: " + HankFonts.Current, "", false, true, HasIcon: false),
             new(PadBtn.A, "", "", false, false, HasIcon: false, Small: true, Legend: new[] { (PadBtn.B, "close") }),
         };
-        overlay.Show("THEME", rows, CurrentStyle(), MenuScale, MenuOpacity, HankHudMod.Instance?.CurrentLook);
+        overlay.Show("THEME AND FONT", rows, CurrentStyle(), MenuScale, MenuOpacity, HankHudMod.Instance?.CurrentLook);
     }
 }
