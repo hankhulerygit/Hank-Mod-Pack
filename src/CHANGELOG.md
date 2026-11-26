@@ -1,5 +1,15 @@
 # Hank Mod Pack changelog
 
+## 1.9.9
+
+### Fixed
+- The Cam Lamp made by the mod is now removed (and the lamp switch set back to off) when you leave the replay; it stayed on before.
+
+## 1.9.8
+
+### Fixed
+- Lights tab: the Intensity and Range options of Map Lights, Head Lamp and Cam Lamp now act on the game's lights in the replay (each light = what it had x chosen value / value the game had), and go back when the keyframes end. The log shows "TLFX: <lamp>: intensity ..., range ... applied" (or "Cam Lamp (made by the mod)").
+
 ## 1.9.7
 
 ### Fixed

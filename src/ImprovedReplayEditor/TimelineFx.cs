@@ -1364,6 +1364,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         public float R0 = 1, G0 = 1, B0 = 1;                          // the colour the game had
         public bool Tinted, SwitchedOn, Was;
         public readonly List<(GameRef Ref, Color Orig)> Found = new(); public float NextScan;
+        public readonly Dictionary<nint, (float I, float R)> OrigIR = new(); public bool Scaled;   // intensity and range each light had before the Intensity / Range options moved them
         public readonly Dictionary<nint, Color> Origs = new();   // the colour each light had before we touched it (kept when the lights are looked up again)
     }
     readonly Dictionary<string, Lamp> lamps = new();
@@ -1410,11 +1411,12 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         if (Unity.Time < nextLampPass) return;
         nextLampPass = Unity.Time + 0.25f;
         var wantCam = lightMode == "CamLight";
-        if (!wantCam && ownLamp == null && !lamps.Values.Any(l => l.Tinted || l.SwitchedOn)) return;
         EnvEnsure();
+        var lampOptionMoved = envOpts.Any(e => LampNames.Contains(e.Group) && (e.Label.EndsWith(" Intensity") || e.Label.EndsWith(" Range")) && LampOptionMoved(e));
+        if (!wantCam && ownLamp == null && !lampOptionMoved && !lamps.Values.Any(l => l.Tinted || l.SwitchedOn || l.Scaled)) return;
         foreach (var l in lamps.Values)
         {
-            if (!wantCam && !l.Tinted && !(l.SwitchedOn && l.Name == "Cam Lamp") && !(ownLamp != null && l.Name == "Cam Lamp")) continue;
+            if (!wantCam && !l.Tinted && !l.Scaled && !lampOptionMoved && !(l.SwitchedOn && l.Name == "Cam Lamp") && !(ownLamp != null && l.Name == "Cam Lamp")) continue;
             var lights = LampLights(l);
             if (l.Name == "Cam Lamp" && lights.Count == 0)
             {
@@ -1429,6 +1431,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
                 if (wantCam) { if (!l.SwitchedOn) { l.Was = Unity.Call<byte>(li, "get_enabled") != 0; l.SwitchedOn = true; } var on = (byte)1; Unity.Call(li, "set_enabled", (nint)(&on)); }
                 else if (l.SwitchedOn) { var was = (byte)(l.Was ? 1 : 0); Unity.Call(li, "set_enabled", (nint)(&was)); l.SwitchedOn = false; }
             }
+            ScaleLampLights(l);
             if (!l.Tinted) continue;
             // Map lights keep their own differences: each one is scaled by (chosen colour / the colour the game showed).
             var fr = l.R0 > 0.001f ? l.R / l.R0 : l.R; var fg = l.G0 > 0.001f ? l.G / l.G0 : l.G; var fb = l.B0 > 0.001f ? l.B / l.B0 : l.B;
@@ -1443,9 +1446,36 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         }
     }
 
+    bool LampOptionMoved(EnvParam e) { try { return Math.Abs(EnvRead(e) - e.Def) > 1e-3f; } catch { return false; } }
+
+    /// <summary>The Intensity / Range options of a lamp: the game's lights follow them even when the game only applies them in its own camera (each light = what it had x chosen value / value the game had).</summary>
+    unsafe void ScaleLampLights(Lamp l)
+    {
+        var ei = envOpts.FirstOrDefault(x => x.Label == l.Name + " Intensity");
+        var er = envOpts.FirstOrDefault(x => x.Label == l.Name + " Range");
+        if (ei == null && er == null) return;
+        float ci = 0, cr = 0;
+        try { if (ei != null) ci = EnvRead(ei); if (er != null) cr = EnvRead(er); } catch { return; }
+        var moved = (ei != null && Math.Abs(ci - ei.Def) > 1e-3f) || (er != null && Math.Abs(cr - er.Def) > 1e-3f);
+        if (!moved && !l.Scaled) return;
+        foreach (var f in l.Found)
+        {
+            var li = f.Ref.Target; if (Unity.IsNull(li)) continue;
+            try
+            {
+                if (!l.OrigIR.TryGetValue(li, out var o)) l.OrigIR[li] = o = (Unity.Call<float>(li, "get_intensity"), Unity.Call<float>(li, "get_range"));
+                if (ei != null && ei.Def > 1e-3f) { var v = o.I * ci / ei.Def; Unity.Call(li, "set_intensity", (nint)(&v)); }
+                if (er != null && er.Def > 1e-3f) { var v = o.R * cr / er.Def; Unity.Call(li, "set_range", (nint)(&v)); }
+            }
+            catch (Exception ex) { LogOnce("lampscale", ex); }
+        }
+        if (logged.Add($"lampscale-{l.Name}")) Log($"TLFX: {l.Name}: intensity {ci:0.##} (game had {ei?.Def:0.##}), range {cr:0.##} (game had {er?.Def:0.##}) applied to {l.Found.Count} light(s)");
+        l.Scaled = moved;
+    }
+
     float EnvValue(string label) { var e = envOpts.FirstOrDefault(x => x.Label == label); if (e == null) return float.NaN; try { return EnvRead(e); } catch { return float.NaN; } }
 
-    OwnedGameObject? ownLamp; nint ownLampComp;
+    OwnedGameObject? ownLamp; nint ownLampComp; string ownLampState = "";
 
     unsafe void OwnCamLamp(Lamp l)
     {
@@ -1473,6 +1503,8 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         // The F3 defaults (intensity 2, range 4) give the lamp that worked well on the replay camera (intensity 4, range 80): x2 and x20.
         var inten = EnvValue("Cam Lamp Intensity"); inten = float.IsNaN(inten) ? 4f : inten * 2f;
         var range = EnvValue("Cam Lamp Range"); range = float.IsNaN(range) ? 80f : range * 20f;
+        var lampState = $"{inten:0.##}/{range:0.##}";
+        if (lampState != ownLampState) { ownLampState = lampState; Log($"TLFX: Cam Lamp (made by the mod): intensity {inten:0.##}, range {range:0.##}"); }
         var c = new Color(l.R, l.G, l.B, 1f); var on = (byte)1;
         Unity.Call(ownLampComp, "set_color", (nint)(&c));
         Unity.Call(ownLampComp, "set_intensity", (nint)(&inten));
@@ -1501,12 +1533,13 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
                     if (li != 0 && !Unity.IsNull(li))
                     {
                         if (l.Tinted) { var c = f.Orig; Unity.Call(li, "set_color", (nint)(&c)); }
+                        if (l.OrigIR.TryGetValue(li, out var oir)) { var vi = oir.I; var vr = oir.R; Unity.Call(li, "set_intensity", (nint)(&vi)); Unity.Call(li, "set_range", (nint)(&vr)); }
                         if (l.SwitchedOn && l.Name == "Cam Lamp") { var was = (byte)(l.Was ? 1 : 0); Unity.Call(li, "set_enabled", (nint)(&was)); }
                     }
                 } catch { }
                 try { f.Ref.Dispose(); } catch { }
             }
-            l.Found.Clear(); l.Origs.Clear(); l.NextScan = 0;
+            l.Found.Clear(); l.Origs.Clear(); l.OrigIR.Clear(); l.Scaled = false; l.NextScan = 0;
             l.Tinted = false; l.SwitchedOn = false; l.R = l.R0; l.G = l.G0; l.B = l.B0;
         }
     }
@@ -1810,7 +1843,7 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
         }
         var env = new EnvManager(self).Raw;
 
-        if (!inReplay || !Enabled) { RestoreEnv(env); RestoreSky(env); if (lamps.Values.Any(l => l.Tinted || l.SwitchedOn)) DropLights(); return; }
+        if (!inReplay || !Enabled) { RestoreEnv(env); RestoreSky(env); if (ownLamp != null || lightMode != "Off" || lamps.Values.Any(l => l.Tinted || l.SwitchedOn || l.Scaled)) { DropLights(); lightMode = "Off"; } return; }
 
         if (needInit)
         {

@@ -1,4 +1,6 @@
-Hank Mod Pack 1.9.7 - what's new:
+Hank Mod Pack 1.9.9 - what's new:
+- Fixed: the Cam Lamp stayed on after leaving the replay.
+- Fixed: Lights tab, Intensity and Range of Map Lights, Head Lamp and Cam Lamp now change the lights in the replay.
 - Fixed: keyframe presets are now kept per map even when the game gives no map name (the map is recognised by its terrain and named Map-xxxxxx).
 - Fixed: saved keyframes no longer load on other maps; each map has its own presets, and their default name starts with the map name.
 - New: Rename keyframes in the keyframe panel.
