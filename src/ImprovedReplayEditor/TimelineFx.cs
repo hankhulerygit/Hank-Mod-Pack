@@ -1394,6 +1394,12 @@ public sealed unsafe class TimelineFxMod : HankModPack.PackPart
             Color c; string path;
             try { c = Unity.Call<Color>(li, "get_color"); path = LightPath(li); } catch { continue; }
             var isMap = path.Contains("CustomObject");
+            // A light is never taken by colour alone for the cam lamp (the game has none in a replay: the mod makes it), and the sun (a directional light) is never a lamp.
+            if (!map)
+            {
+                if (l.Name == "Cam Lamp") continue;
+                try { if (Unity.Call<int>(li, "get_type") == 1) continue; } catch { }
+            }
             if (!isMap) lines.Add($"{path} C=({c.R:0.##},{c.G:0.##},{c.B:0.##})");
             if (map ? isMap : !isMap && Math.Abs(c.R - l.R0) < 0.03f && Math.Abs(c.G - l.G0) < 0.03f && Math.Abs(c.B - l.B0) < 0.03f)
             {

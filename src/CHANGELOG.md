@@ -1,5 +1,10 @@
 # Hank Mod Pack changelog
 
+## 1.9.10
+
+### Fixed
+- Cam Lamp in the replay works again: it was sometimes matched to another light of the scene (the sun or a spot light with a similar colour) instead of making its own lamp. The cam lamp now always uses the mod's lamp, and the sun is never taken as a lamp.
+
 ## 1.9.9
 
 ### Fixed
